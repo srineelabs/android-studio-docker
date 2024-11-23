@@ -23,4 +23,4 @@ mkdir -p studio-data/profile/android
 mkdir -p studio-data/profile/gradle
 mkdir -p studio-data/profile/java
 docker volume create --name=android_studio
-docker run -i $AOSP_ARGS -v `pwd`/studio-data:/studio-data -v android_studio:/androidstudio-data --privileged --group-add plugdev deadolus/android-studio $@
+docker run -i $AOSP_ARGS -v `pwd`/studio-data:/studio-data -v android_studio:/androidstudio-data --privileged --group-add plugdev deadolus/android-studio-2024.2.1.11 $@

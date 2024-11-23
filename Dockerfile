@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 LABEL Simon Egli <docker_android_studio_860dd6@egli.online>
 
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
         build-essential git neovim wget unzip sudo \
         libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386 \
         libxrender1 libxtst6 libxi6 libfreetype6 libxft2 xz-utils vim\
-        qemu qemu-kvm libvirt-bin ubuntu-vm-builder bridge-utils libnotify4 libglu1 libqt5widgets5 openjdk-8-jdk openjdk-11-jdk xvfb \
+        qemu qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils libnotify4 libglu1 libqt5widgets5 openjdk-17-jdk xvfb \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -44,20 +44,26 @@ USER $USER
 WORKDIR /home/$USER
 
 #Install Flutter
-ARG FLUTTER_URL=https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.6-stable.tar.xz
-ARG FLUTTER_VERSION=3.13.6
+#ARG FLUTTER_URL=https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.6-stable.tar.xz
+#ARG FLUTTER_VERSION=3.13.6
 
-RUN wget "$FLUTTER_URL" -O flutter.tar.xz
-RUN tar -xvf flutter.tar.xz
-RUN rm flutter.tar.xz
+#RUN wget "$FLUTTER_URL" -O flutter.tar.xz
+#RUN tar -xvf flutter.tar.xz
+#RUN rm flutter.tar.xz
 
 #Android Studio
-ARG ANDROID_STUDIO_URL=https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.3.1.20/android-studio-2022.3.1.20-linux.tar.gz
-ARG ANDROID_STUDIO_VERSION=2022.3.1.20
+ARG ANDROID_STUDIO_URL=https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.11/android-studio-2024.2.1.11-linux.tar.gz
+ARG ANDROID_STUDIO_VERSION=2024.2.1.11
 
 RUN wget "$ANDROID_STUDIO_URL" -O android-studio.tar.gz
 RUN tar xzvf android-studio.tar.gz
 RUN rm android-studio.tar.gz
+
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+RUN unzip commandlinetools-linux-11076708_latest.zip
+RUN rm commandlinetools-linux-11076708_latest.zip
+RUN mv cmdline-tools /home/$USER/android-studio
+RUN /home/$USER/android-studio/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "cmdline-tools;latest" "system-images;android-35;default;x86_64" "system-images;android-35;google_apis;x86_64" "system-images;android-35;google_apis_playstore;x86_64" "emulator" "extras;android;m2repository" "extras;google;m2repository"  --sdk_root=/home/$USER/android-studio/cmdline-tools
 
 RUN ln -s /studio-data/profile/AndroidStudio$ANDROID_STUDIO_VERSION .AndroidStudio$ANDROID_STUDIO_VERSION
 RUN ln -s /studio-data/Android Android
@@ -65,6 +71,7 @@ RUN ln -s /studio-data/profile/android .android
 RUN ln -s /studio-data/profile/java .java
 RUN ln -s /studio-data/profile/gradle .gradle
 ENV ANDROID_EMULATOR_USE_SYSTEM_LIBS=1
+COPY android-studio-config.xml .android
 
 WORKDIR /home/$USER
 
